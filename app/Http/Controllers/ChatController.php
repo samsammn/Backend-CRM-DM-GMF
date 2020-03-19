@@ -26,7 +26,7 @@ class ChatController extends Controller
     public function fetchMessages(Request $request, $id)
     {
         $user = DB::table('user')->where('user_id', $id)->get();
-        
+
         if ($user[0]->role == "Customer"){
             $message = DB::table('message')->where('user_id',$id)->orWhere('rcv_user_id',$id)->orderBy('created_at','ASC')->get();
             $unread = 0;
@@ -62,10 +62,10 @@ class ChatController extends Controller
                     }
                 }
                 $user_customer = DB::table('user_customer')->where('user_id',$send)->get();
-                
+
                 $user = DB::table('user')->where('user_id',$send)->get();
                 $company = DB::table('company')->where('company_id',$user_customer[0]->company_id)->get();
-                
+
                 $rsp_body = (object)[
                     $send => ([
                         "name" => $user_customer[0]->name,
@@ -87,7 +87,7 @@ class ChatController extends Controller
             ]);
         }
     }
-    
+
     public function chatHistoryCustomer($id) {
         $chats = DB::table('message')->where('user_id', $id)->orWhere('rcv_user_id', $id)->where('status','=','close')->get();
         return response()->json([
@@ -153,7 +153,7 @@ class ChatController extends Controller
             if (!Session::has('time_bot')){
               Session::put('time_bot', date('d-m-Y H:i:s'));
             }
-            
+
             $startDate = Carbon::createFromFormat('d-m-Y H:i:s', Session::get('time_bot'));
             $endDate = Carbon::createFromFormat('d-m-Y H:i:s', date('d-m-Y H:i:s'));
 
@@ -249,7 +249,7 @@ class ChatController extends Controller
             'message' => "Thread Closed"
         ]);
     }
-    
+
     public function deleteMessage($id){
         DB::table('message')->where('status','close')->where('user_id',$id)->orWhere('rcv_user_id',$id)->delete();
         return response()->json([

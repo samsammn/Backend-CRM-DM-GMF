@@ -133,7 +133,7 @@ Route::get('/companyads/add/{ads_id}/{company_id}','CompanyAdsController@add');
 Route::get('/companyads/remove/{ads_id}/{company_id}','CompanyAdsController@remove');
 
 //project route
-Route::get('/project/read','ProjectController@readactive');
+Route::get('/project/read','ProjectController@read');
 Route::get('/project/read/active','ProjectController@readactive');
 Route::get('/project/read/{id}','ProjectController@readProjectInCompany');
 Route::get('/project/edit/{id}','ProjectController@edit');
