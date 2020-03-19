@@ -52,6 +52,7 @@ class CompanyController extends Controller
     }
     function update(Request $request){
         $company = DB::table('company')->where('company_id',$request->id)->get(); 
+        
         $path = $request->image != NULL ? Storage::putFile('company', $request->image) : $company[0]->image;
         if ($request->image != NULL){
             Storage::delete($company[0]->image);
@@ -103,6 +104,7 @@ class CompanyController extends Controller
             'fleet_size' => $request->fleet_size,
             'destination' => $request->destination,
             'customer_since' => $request->customer_since,
+            'company_sap_code' => $request->company_sap_code
         ]);
         return response()->json([
             'message' => 'Company Created'

@@ -104,6 +104,7 @@ class ComplaintController extends Controller
             'complaint_id' => $request->complaint_id,
             'user_id' => $request->user_id,
             'sender_role' => $request->sender_role,
+            'created_at' => date('Y-m-d H:i:s')
         ]);
         return response()->json([
             'message' => 'Replied Created'
@@ -111,7 +112,7 @@ class ComplaintController extends Controller
     }
 
     function readReply($id){
-        $reply = DB::table('reply_complaint')->where('complaint_id',$id)->orderBy('created_at','DESC')->get(['description','sender_role','user_id']);
+        $reply = DB::table('reply_complaint')->where('complaint_id',$id)->orderBy('created_at','DESC')->get(['description','sender_role','user_id', 'created_at']);
         foreach ($reply as $re){
             if ($re->sender_role == 'Customer'){
                 $customer = DB::table('user_customer')->where('user_id',$re->user_id)->get();

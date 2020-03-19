@@ -8,29 +8,34 @@ use Illuminate\Support\Facades\Storage;
 
 class RevenueController extends Controller
 {
+    //
     function read(){
         $revenue = DB::table('revenue')->get();
         return response()->json([
             'data' => $revenue
         ]);
     }
-
+	//
 	function sum(Request $request, $id){
-        $filter[] = ['company_id', '=', $id];
+    $filter[] = ['company_id', '=', $id];
 
-        if ($request->start_date !== null && $request->end_date !== null) {
-            $filter[] = [DB::raw('date(datetime)'), '>=', $request->start_date];
-            $filter[] = [DB::raw('date(datetime)'), '<=', $request->start_date];
-        }
-        $revenue = DB::table('revenue')
-                    ->selectRaw('product, sum(sales) as summary')
-                    ->where($filter)
-                    ->groupBy('product')
-                    ->get();
-
-		return response()->json($revenue);
+    if ($request->start_date !== null && $request->end_date !== null) {
+        $filter[] = [DB::raw('date(datetime)'), '>=', date($request->start_date)];
+        $filter[] = [DB::raw('date(datetime)'), '<=', date($request->end_date)];
     }
-
+    
+    $revenue = DB::table('revenue')
+				//->join('revenue','revenue.product', '=', 'product')
+				//->select('company_id','revenue_id','company_sap_code')
+                ->select('product', DB::raw('sum(sales) as sales'))
+                ->where($filter)
+                ->groupBy(['product'])
+                ->get();
+				
+	return response()->json(['data'=>$revenue]);
+    }
+	
+	//
     function readRevenueInCompany($id){
         $revenue = DB::table('revenue')->where('company_id',$id)->get();
         return response()->json([
@@ -71,10 +76,15 @@ class RevenueController extends Controller
     }
 
     function create(Request $request){
+        $company = DB::table('company')->where('company_id', $request->company_id)->first();
+        $sap_code = $company->company_sap_code;
+        
         DB::table('revenue')->insert([
+            'company_sap_code' => $sap_code,
             'product' => $request->product,
             'sales' => $request->sales,
-            'company_id' => $request->company_id
+            'company_id' => $request->company_id,
+            'datetime' => $request->datetime
         ]);
         return response()->json([
             'message' => 'Revenue Created'

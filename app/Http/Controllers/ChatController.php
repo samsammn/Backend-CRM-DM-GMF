@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Events\MessageSent;
+use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Storage;
 
 class ChatController extends Controller
 {
@@ -23,62 +23,49 @@ class ChatController extends Controller
      *
      * @return Message
      */
-    public function fetchMessages($id)
+    public function fetchMessages(Request $request, $id)
     {
-        $user = DB::table('user')->where('user_id', $id)->first();
-        if ($user === null) {
-            return response()->json([
-                'message' => 'User not found'
-            ]);
-        }
-
-        if ($user->role == "Customer"){
-            $message = DB::table('message')
-                            ->where('user_id', '=', $id)
-                            ->orWhere('rcv_user_id', $id)
-                            ->orderBy('created_at', 'ASC')
-                            ->get();
-
-            $count = 0;
+        $user = DB::table('user')->where('user_id', $id)->get();
+        
+        if ($user[0]->role == "Customer"){
+            $message = DB::table('message')->where('user_id',$id)->orWhere('rcv_user_id',$id)->orderBy('created_at','ASC')->get();
+            $unread = 0;
             foreach ($message as $msgu){
                 if ($msgu->already_read == 0 && $msgu->user_id != $id){
-                    $count = $count + 1;
+                    $unread = $unread + 1;
                 }
             }
-
+            $response = $message;
             return response()->json([
-                "message" => $message,
-                "unread_count" => $count
+                "message" => $response,
+                "unread_count" => $unread
             ]);
-
         }else{
             $sender = array();
+            $receiver = array();
             $response = array();
-            $message = DB::table('message')->orderBy('created_at','DESC')->get();
-
+            $message = DB::table('message')->where('status', $request->thread)->orderBy('created_at','DESC')->get();
             foreach ($message as $msg){
-                if (!in_array($msg->user_id, $sender) && $msg->sender != "admin"){
+                if (!in_array($msg->user_id,$sender) && $msg->sender != "admin"){
                     $sender[] = $msg->user_id;
                 }
-                if (!in_array($msg->rcv_user_id, $sender) && $msg->receiver != "admin"){
+                if (!in_array($msg->rcv_user_id,$sender) && $msg->receiver != "admin"){
                     $sender[] = $msg->rcv_user_id;
                 }
             }
-
             foreach ($sender as $send){
-                $message_user = DB::table('message')->where('user_id', $send)->orWhere('rcv_user_id', $send)->orderBy('created_at','ASC')->get();
+                $message_user = DB::table('message')->where('user_id',$send)->orWhere('rcv_user_id',$send)->orderBy('created_at','ASC')->get();
                 $unread = 0;
-
                 foreach ($message_user as $msgu){
                     if ($msgu->already_read == 0 && $msgu->user_id != $id){
                         $unread = $unread + 1;
                     }
                 }
-
                 $user_customer = DB::table('user_customer')->where('user_id',$send)->get();
+                
                 $user = DB::table('user')->where('user_id',$send)->get();
                 $company = DB::table('company')->where('company_id',$user_customer[0]->company_id)->get();
-
+                
                 $rsp_body = (object)[
                     $send => ([
                         "name" => $user_customer[0]->name,
@@ -91,6 +78,7 @@ class ChatController extends Controller
                 ];
 
                 $response[] = $rsp_body;
+                //return response()->json($rsp_body);
 
             }
 
@@ -98,6 +86,14 @@ class ChatController extends Controller
                 $response
             ]);
         }
+    }
+    
+    public function chatHistoryCustomer($id) {
+        $chats = DB::table('message')->where('user_id', $id)->orWhere('rcv_user_id', $id)->where('status','=','close')->get();
+        return response()->json([
+            'data' => $chats,
+            'total' => count($chats)
+        ]);
     }
 
     /**
@@ -155,9 +151,9 @@ class ChatController extends Controller
 
             // mengecek waktu terakhir bot dikirim
             if (!Session::has('time_bot')){
-                Session::put('time_bot', date('d-m-Y H:i:s'));
+              Session::put('time_bot', date('d-m-Y H:i:s'));
             }
-
+            
             $startDate = Carbon::createFromFormat('d-m-Y H:i:s', Session::get('time_bot'));
             $endDate = Carbon::createFromFormat('d-m-Y H:i:s', date('d-m-Y H:i:s'));
 
@@ -175,7 +171,7 @@ class ChatController extends Controller
                     'rcv_user_id' => $request->user_id,
                     'type' => "text"
                 ]);
-                Session::set('time_bot', date('d-m-Y H:i:s'));
+                Session::put('time_bot', date('d-m-Y H:i:s'));
             }
         }
         // $message = (object)([
@@ -253,7 +249,7 @@ class ChatController extends Controller
             'message' => "Thread Closed"
         ]);
     }
-
+    
     public function deleteMessage($id){
         DB::table('message')->where('status','close')->where('user_id',$id)->orWhere('rcv_user_id',$id)->delete();
         return response()->json([

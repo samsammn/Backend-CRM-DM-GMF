@@ -133,13 +133,14 @@ Route::get('/companyads/add/{ads_id}/{company_id}','CompanyAdsController@add');
 Route::get('/companyads/remove/{ads_id}/{company_id}','CompanyAdsController@remove');
 
 //project route
-Route::get('/project/read','ProjectController@read');
+Route::get('/project/read','ProjectController@readactive');
+Route::get('/project/read/active','ProjectController@readactive');
 Route::get('/project/read/{id}','ProjectController@readProjectInCompany');
 Route::get('/project/edit/{id}','ProjectController@edit');
 Route::post('/project/update','ProjectController@update');
 Route::get('/project/delete/{id}','ProjectController@delete');
 Route::post('/project/create','ProjectController@create');
-Route::get('/project/fetch','ProjectController@getProject');
+Route::get('/project/fetch','ProjectController@read');
 
 Route::get('/calendar/{month}/{year}','CalendarController@getHighlightedDays');
 Route::get('/calendar/{day}/{month}/{year}','CalendarController@getCalendarDetail');
@@ -150,13 +151,13 @@ Route::get('/information/readinformation/{id}','InformationController@readInform
 Route::post('/newsletter/send','NewsletterController@send');
 
 Route::get('/messages', 'ChatController@index');
-Route::post('/messages/send', 'ChatController@sendMessage');
 Route::get('/messages/get/{id}', 'ChatController@fetchMessages');
+Route::post('/messages/send', 'ChatController@sendMessage');
 Route::get('/messages/read/{sender_id}/{receiver_id}', 'ChatController@readMessage');
 Route::get('/messages/search/{query}', 'ChatController@searchMessage');
 Route::get('/messages/close/{id}', 'ChatController@closeThread');
 Route::get('/messages/delete/{id}', 'ChatController@deleteMessage');
-
+Route::get('/messages/history/{id}', 'ChatController@chatHistoryCustomer');
 Route::get('/popup/read/{id}', 'PopUpController@read');
 
 Route::get('/fleet/read','FleetMaintController@read');
@@ -168,11 +169,11 @@ Route::get('/fleet/readcompany/{id}','FleetMaintController@readByCompanyId');
 Route::get('/fleet/readcompanyproduct/{id}/{product}','FleetMaintController@readByCompanyProduct');
 
 Route::get('/revenue/read','RevenueController@read');
-Route::get('/revenue/sum/{id}','RevenueController@sum');
-Route::get('/revenue/read/{id}','RevenueController@readRevenueInCompany');
+Route::get('/revenue/read/{id}','RevenueController@sum');
 Route::post('/revenue/update','RevenueController@update');
 Route::get('/revenue/delete/{id}','RevenueController@delete');
 Route::post('/revenue/create','RevenueController@create');
+Route::get('/revenue/sum/{id}','RevenueController@sum');
 
 Route::get('/pastmarketing/read','PastMarketingController@read');
 Route::get('/pastmarketing/read/{id}','PastMarketingController@readPastMarketingInCompany');
