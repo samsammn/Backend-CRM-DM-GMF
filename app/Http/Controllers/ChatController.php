@@ -23,52 +23,62 @@ class ChatController extends Controller
      *
      * @return Message
      */
-    public function fetchMessages(Request $request, $id)
+    public function fetchMessages($id)
     {
-        $user = DB::table('user')->where('user_id',$id)->get();
-        // return $user;
-        if ($user[0]->role == "Customer"){
-            $message = DB::table('message')->where('user_id',$id)->orWhere('rcv_user_id',$id)->orderBy('created_at','ASC')->get();
-            $unread = 0;
+        $user = DB::table('user')->where('user_id', $id)->first();
+        if ($user === null) {
+            return response()->json([
+                'message' => 'User not found'
+            ]);
+        }
+
+        if ($user->role == "Customer"){
+            $message = DB::table('message')
+                            ->where('user_id', '=', $id)
+                            ->orWhere('rcv_user_id', $id)
+                            ->orderBy('created_at', 'ASC')
+                            ->get();
+
+            $count = 0;
             foreach ($message as $msgu){
                 if ($msgu->already_read == 0 && $msgu->user_id != $id){
-                    $unread = $unread + 1;
+                    $count = $count + 1;
                 }
             }
-            $response = $message;
+
             return response()->json([
-                "message" => $response,
-                "unread_count" => $unread
+                "message" => $message,
+                "unread_count" => $count
             ]);
+
         }else{
             $sender = array();
-            $receiver = array();
             $response = array();
             $message = DB::table('message')->orderBy('created_at','DESC')->get();
+
             foreach ($message as $msg){
-                if (!in_array($msg->user_id,$sender) && $msg->sender != "admin"){
+                if (!in_array($msg->user_id, $sender) && $msg->sender != "admin"){
                     $sender[] = $msg->user_id;
                 }
-                if (!in_array($msg->rcv_user_id,$sender) && $msg->receiver != "admin"){
+                if (!in_array($msg->rcv_user_id, $sender) && $msg->receiver != "admin"){
                     $sender[] = $msg->rcv_user_id;
                 }
             }
 
             foreach ($sender as $send){
-                $message_user = DB::table('message')->where('user_id',$send)->orWhere('rcv_user_id',$send)->orderBy('created_at','ASC')->get();
+                $message_user = DB::table('message')->where('user_id', $send)->orWhere('rcv_user_id', $send)->orderBy('created_at','ASC')->get();
                 $unread = 0;
+
                 foreach ($message_user as $msgu){
                     if ($msgu->already_read == 0 && $msgu->user_id != $id){
                         $unread = $unread + 1;
                     }
                 }
 
-
                 $user_customer = DB::table('user_customer')->where('user_id',$send)->get();
                 $user = DB::table('user')->where('user_id',$send)->get();
                 $company = DB::table('company')->where('company_id',$user_customer[0]->company_id)->get();
 
-                // return response()->json($message_user);
                 $rsp_body = (object)[
                     $send => ([
                         "name" => $user_customer[0]->name,
@@ -79,8 +89,6 @@ class ChatController extends Controller
                         "company" => $company[0]->name
                     ])
                 ];
-
-                return response()->json($rsp_body);
 
                 $response[] = $rsp_body;
 
