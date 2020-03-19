@@ -15,7 +15,7 @@ class UserController extends Controller
         $user = DB::table('user')->get();
         return response()->json([
             'data' => $user
-        ]);  
+        ]);
     }
 
     public function create(Request $request)
@@ -41,21 +41,21 @@ class UserController extends Controller
                 'customer_role' => $request->customer_role,
                 'user_id' => $user[0]->user_id,
                 'company_id' => $company[0]->company_id
-            ]);  
+            ]);
         }else if ($request->role == 'Admin'){
             DB::table('user_admin')->insert([
                 'name' => $request->name,
                 'position' => $request->position,
                 'division' => $request->division,
                 'user_id' => $user[0]->user_id
-            ]);   
+            ]);
         }else{
             DB::table('user_guest')->insert([
                 'name' => $request->name,
                 'position' => $request->position,
                 'division' => $request->division,
                 'user_id' => $user[0]->user_id
-            ]);  
+            ]);
         }
 
         return response()->json([
@@ -95,7 +95,7 @@ class UserController extends Controller
             'pass_raw' => $request->password != NULL ? $request->password : $user[0]->pass_raw,
             'image' => $path
         ]);
-        
+
         if($user[0]->role == 'Customer'){
             $user = DB::table('user')->join('user_customer','user.user_id','=','user_customer.user_id')->where('user.user_id',$request->id)->get();
             DB::table('user_customer')->where('user_id',$user[0]->user_id)->update([
@@ -149,7 +149,7 @@ class UserController extends Controller
             ]);
         }
     }
-    
+
     function read_message_admin(){
         DB::table('user_admin')->update([
             'not_read_msg' => 0
@@ -176,6 +176,12 @@ class UserController extends Controller
     }
 
     function read_admin($id){
+        $countMessage = DB::table('message')->where('user_id', '<>', $id)->where('already_read', '=', 0)->count();
+
+        DB::table('user_admin')->update([
+            'not_read_msg' => $countMessage
+        ]);
+
         $admin = DB::table('user_admin')->where('user_id',$id)->get();
         return response()->json([
             'data' => $admin

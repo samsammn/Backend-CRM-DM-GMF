@@ -10,7 +10,7 @@ class ComplaintController extends Controller
 {
     //
     function read(){
-        $complaint = DB::table('complaint')->get();
+        $complaint = DB::table('complaint')->orderBy('date', 'desc')->get();
         foreach ($complaint as $comp){
             $company = DB::table('company')->where('company_id',$comp->company_id)->get();
             $comp->company_name = $company[0]->name;
