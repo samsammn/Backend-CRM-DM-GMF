@@ -11,23 +11,27 @@ class ProjectController extends Controller
 {
     //
     function read(){
-        $project = DB::table('project')->get();
+        $project = DB::table('project')
+                        ->selectRaw('project.*, company.name as company_name')
+                        ->join('company', 'company.company_id', '=', 'project.company_id')
+                        ->get();
+
         return response()->json([
             'data' => $project
         ]);
     }
-	
+
 	function readactive(){
 		$project = DB::table('project')
                     ->join('company','company.company_id','=','project.company_id')
                     ->select('project.*')
                     ->where('company.status','=','Active')
                     ->get();
-                    
+
 		return response()->json([
             'data' => $project
         ]);
-		
+
 	}
 
     function readProjectInCompany($id){
