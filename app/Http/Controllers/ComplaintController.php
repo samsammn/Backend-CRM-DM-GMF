@@ -36,7 +36,13 @@ class ComplaintController extends Controller
         $complaint = DB::table('complaint')->where('complaint_id',$id)->get();
         $company = DB::table('company')->where('company_id',$complaint[0]->company_id)->get();
         $complaint[0]->company_name = $company[0]->name;
+
         if (!$complaint->isEmpty()){
+
+            DB::table('complaint')
+            ->where('complaint_id', $id)
+            ->update(['have_new_activity' => 0]);
+
             return response()->json([
                 'message' => 'Complaint found',
                 'data' => $complaint
@@ -106,6 +112,11 @@ class ComplaintController extends Controller
             'sender_role' => $request->sender_role,
             'created_at' => date('Y-m-d H:i:s')
         ]);
+
+        DB::table('complaint')
+            ->where('complaint_id', $request->complaint_id)
+            ->update(['have_new_activity' => 1]);
+
         return response()->json([
             'message' => 'Replied Created'
         ]);
