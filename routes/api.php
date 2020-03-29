@@ -1,6 +1,9 @@
 <?php
 
+// use Illuminate\Support\Facades\DB;
+// use Illuminate\Support\Facades\Redis;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -12,6 +15,32 @@ use Illuminate\Http\Request;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
+// Route::get('/redis', function() {
+//     $redis = Redis::connection();
+
+//     if ($redis->exists('users')) {
+//         $data = json_decode($redis->get('users'));
+//         $source = 'data from redis';
+//     } else {
+//         $data = DB::table('user')->get();
+//         $redis->set('users', $data);
+//         $source = 'data from hit database';
+//     }
+
+//     return response()->json([
+//         'users' => $data,
+//         'source' => $source,
+//         'redis' => $redis->keys('*')
+//     ]);
+// });
+
+// Route::get('/redis-clear', function() {
+//     $redis = Redis::connection();
+//     $redis->flushall();
+
+//     return "Redis Cleared";
+// });
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
@@ -194,4 +223,7 @@ Route::post('/ctype/update','CustomerTypeController@update');
 Route::get('/ctype/delete/{id}','CustomerTypeController@delete');
 Route::post('/ctype/create','CustomerTypeController@create');
 
-
+Route::get('/aircraft_type/read','AircraftTypeController@read');
+Route::post('/aircraft_type/update/{id}','AircraftTypeController@update');
+Route::get('/aircraft_type/delete/{id}','AircraftTypeController@delete');
+Route::post('/aircraft_type/create','AircraftTypeController@create');

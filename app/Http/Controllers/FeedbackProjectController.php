@@ -106,6 +106,13 @@ class FeedbackProjectController extends Controller
                     'service_id' => $service1[0]->service_id,
                     'list_feedback_project_id' => $request->list_feedback_project_id
                 ]);
+
+                DB::table('list_feedback_project_aspect')->insert([
+                    'list_feedback_project_id' => $request->list_feedback_project_id,
+                    'service' => $service['service'],
+                    'aspect' => $service['aspect_to_improve']
+                ]);
+
                 DB::table('user_admin')->update([
                     'not_read_feedback' => DB::raw('not_read_feedback + 1')
                 ]);
@@ -264,14 +271,18 @@ class FeedbackProjectController extends Controller
             ];
         }
 
-
         return response()->json([
             'trend' => $final,
         ]);
     }
 
     function listFeedback($id){
-        $list = DB::table('list_feedback_project')->where('project_id',$id)->get();
+        $list = DB::table('list_feedback_project')->where('project_id', $id)->get();
+        foreach ($list as $item) {
+            $aspect = DB::table('list_feedback_project_aspect')->where('list_feedback_project_id', $item->list_feedback_project_id)->get();
+            $item->aspect = $aspect;
+        }
+
         return response()->json([
             'data' => $list,
         ]);
