@@ -10,15 +10,42 @@ use GuzzleHttp\Client;
 class ProjectController extends Controller
 {
     //
-    function read(){
+    function read(Request $request) {
+        $sort = $request->sort;
+        $filters = $request->filters;
+
+        $sortArray = [];
+        $whereArray = [];
+
+        if ($sort['by'] === null) {
+            $sortArray['by'] = 'project_id';
+            $sortArray['sort'] = 'desc';
+        } else {
+            $sortArray['by'] = $sort['by'];
+            $sortArray['sort'] = $sort['sort'];
+        }
+
+        if ($filters['company_id'] !== null) {
+            $whereArray[] = ['project.company_id', $filters['company_id']];
+        }
+
+        if ($filters['project_type'] !== null) {
+            $whereArray[] = ['project.project_type', $filters['project_type']];
+        }
+
+        if ($filters['status'] !== null) {
+            $whereArray[] = ['project.status', $filters['status']];
+        }
+
         $project = DB::table('project')
                         ->selectRaw('project.*, company.name as company_name')
                         ->join('company', 'company.company_id', '=', 'project.company_id')
-                        ->get();
+                        ->orderBy($sortArray['by'], $sortArray['sort'])
+                        ->where($whereArray)
+                        ->offset($request->page)
+                        ->paginate($request->per_page);
 
-        return response()->json([
-            'data' => $project
-        ]);
+        return $project;
     }
 
 	function readactive(){
