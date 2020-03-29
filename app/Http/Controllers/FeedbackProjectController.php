@@ -109,8 +109,9 @@ class FeedbackProjectController extends Controller
 
                 DB::table('list_feedback_project_aspect')->insert([
                     'list_feedback_project_id' => $request->list_feedback_project_id,
+                    'aspect' => $service['aspect_to_improve'],
                     'service' => $service['service'],
-                    'aspect' => $service['aspect_to_improve']
+                    'rating' => $service['rating']
                 ]);
 
                 DB::table('user_admin')->update([
