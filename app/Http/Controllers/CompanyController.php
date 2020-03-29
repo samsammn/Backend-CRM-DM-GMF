@@ -51,8 +51,8 @@ class CompanyController extends Controller
         }
     }
     function update(Request $request){
-        $company = DB::table('company')->where('company_id',$request->id)->get(); 
-        
+        $company = DB::table('company')->where('company_id',$request->id)->get();
+
         $path = $request->image != NULL ? Storage::putFile('company', $request->image) : $company[0]->image;
         if ($request->image != NULL){
             Storage::delete($company[0]->image);
@@ -74,6 +74,7 @@ class CompanyController extends Controller
             'fleet_size' => $request->fleet_size != NULL ? $request->fleet_size : $company[0]->fleet_size,
             'destination' => $request->destination != NULL ? $request->destination : $company[0]->destination,
             'customer_since' => $request->customer_since != NULL ? $request->customer_since : $company[0]->customer_since,
+            'currency' => $request->currency != NULL ? $request->currency : $company[0]->currency
         ]);
         return response()->json([
             'message' => 'Company Updated'
@@ -104,7 +105,8 @@ class CompanyController extends Controller
             'fleet_size' => $request->fleet_size,
             'destination' => $request->destination,
             'customer_since' => $request->customer_since,
-            'company_sap_code' => $request->company_sap_code
+            'company_sap_code' => $request->company_sap_code,
+            'currency' => $request->currency,
         ]);
         return response()->json([
             'message' => 'Company Created'
@@ -122,5 +124,19 @@ class CompanyController extends Controller
         $url = \config('filesystems.disks.local.root');
         Excel::import(new CompleteCompanyImport, $url."/".$path);
         return "Successfully add Customer";
+    }
+
+    public function projectoption()
+    {
+        $data = DB::table('company')
+                    ->selectRaw('company.company_id, company.name')
+                    ->join('project', 'project.company_sap_code', '=', 'company.company_sap_code')
+                    ->groupBy('company.company_id', 'company.name')
+                    ->orderBy('company.name')
+                    ->get();
+
+        return response()->json([
+            'data' => $data
+        ]);
     }
 }

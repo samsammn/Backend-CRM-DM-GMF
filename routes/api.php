@@ -96,6 +96,7 @@ Route::post('/company/update','CompanyController@update');
 Route::post('/company/create','CompanyController@create');
 Route::get('/company/export','CompanyController@export_excel');
 Route::post('/company/import','CompanyController@import_excel');
+Route::get('/company/projectoption','CompanyController@projectoption');
 
 
 //complaint route

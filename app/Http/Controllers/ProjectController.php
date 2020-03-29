@@ -11,8 +11,8 @@ class ProjectController extends Controller
 {
     //
     function read(Request $request) {
-        $sort = $request->sort;
-        $filters = $request->filters;
+        $sort = json_decode($request->sort, true);
+        $filters = json_decode($request->filters, true);
 
         $sortArray = [];
         $whereArray = [];

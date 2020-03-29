@@ -17,24 +17,23 @@ class RevenueController extends Controller
     }
 	//
 	function sum(Request $request, $id){
-    $filter[] = ['company_id', '=', $id];
+    $filter[] = ['revenue.company_id', '=', $id];
 
     if ($request->start_date !== null && $request->end_date !== null) {
-        $filter[] = [DB::raw('date(datetime)'), '>=', date($request->start_date)];
-        $filter[] = [DB::raw('date(datetime)'), '<=', date($request->end_date)];
+        $filter[] = [DB::raw('date(revenue.datetime)'), '>=', date($request->start_date)];
+        $filter[] = [DB::raw('date(revenue.datetime)'), '<=', date($request->end_date)];
     }
-    
+
     $revenue = DB::table('revenue')
-				//->join('revenue','revenue.product', '=', 'product')
-				//->select('company_id','revenue_id','company_sap_code')
-                ->select('product', DB::raw('sum(sales) as sales'))
+				->join('company','company.company_id', '=', 'revenue.company_id')
+                ->selectRaw('revenue.product, company.currency, sum(sales) as sales')
                 ->where($filter)
-                ->groupBy(['product'])
+                ->groupBy(['product', 'currency'])
                 ->get();
-				
+
 	return response()->json(['data'=>$revenue]);
     }
-	
+
 	//
     function readRevenueInCompany($id){
         $revenue = DB::table('revenue')->where('company_id',$id)->get();
@@ -78,7 +77,7 @@ class RevenueController extends Controller
     function create(Request $request){
         $company = DB::table('company')->where('company_id', $request->company_id)->first();
         $sap_code = $company->company_sap_code;
-        
+
         DB::table('revenue')->insert([
             'company_sap_code' => $sap_code,
             'product' => $request->product,
