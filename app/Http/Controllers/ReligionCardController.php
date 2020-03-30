@@ -30,6 +30,10 @@ class ReligionCardController extends Controller
         }
     }
     function update(Request $request){
+        $this->validate($request, [
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:1024'
+        ]);
+
         $religion_card = DB::table('religion_card')->where('religion_card_id',$request->religion_card_id)->get();
         $path = $request->image != NULL ? Storage::putFile('religioncard', $request->image) : $religion_card[0]->image;
         if ($request->image != NULL){
@@ -45,7 +49,8 @@ class ReligionCardController extends Controller
             'updated_at' => now()
         ]);
         return response()->json([
-            'message' => 'Religion Card Updated'
+            'message' => 'Religion Card Updated',
+            'errors' => ''
         ]);
     }
     function delete($id){
@@ -53,6 +58,10 @@ class ReligionCardController extends Controller
         return 'deleted';
     }
     function create(Request $request){
+        $this->validate($request, [
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:1024'
+        ]);
+
         $path = $request->image != NULL ? Storage::putFile('religioncard', $request->image) : "";
         DB::table('religion_card')->insert([
             'subject' => $request->subject,
@@ -63,8 +72,10 @@ class ReligionCardController extends Controller
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
         return response()->json([
-            'message' => 'Religion Card Created'
+            'message' => 'Religion Card Created',
+            'errors' => ''
         ]);
     }
 }

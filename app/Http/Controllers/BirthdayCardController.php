@@ -30,6 +30,10 @@ class BirthdayCardController extends Controller
         }
     }
     function update(Request $request){
+        $this->validate($request, [
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:1024'
+        ]);
+
         $birthday_card = DB::table('birthday_card')->where('birthday_card_id',$request->id)->get();
         $path = $request->image != NULL ? Storage::putFile('birthdaycard', $request->image) : $birthday_card[0]->image;
         if ($request->image != NULL){
@@ -41,8 +45,10 @@ class BirthdayCardController extends Controller
             'image' => $path,
             'updated_at' => now()
         ]);
+
         return response()->json([
-            'message' => 'Birthday Card Updated'
+            'message' => 'Birthday Card Updated',
+            'errors' => ''
         ]);
     }
     function delete($id){
@@ -52,6 +58,10 @@ class BirthdayCardController extends Controller
         ]);
     }
     function create(Request $request){
+        $this->validate($request, [
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:1024'
+        ]);
+
         $path = $request->image != NULL ? Storage::putFile('birthdaycard', $request->image) : "";
         DB::table('birthday_card')->insert([
             'subject' => $request->subject,
@@ -60,8 +70,10 @@ class BirthdayCardController extends Controller
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
         return response()->json([
-            'message' => 'Birthday Card Created'
+            'message' => 'Birthday Card Created',
+            'errors' => ''
         ]);
     }
 }

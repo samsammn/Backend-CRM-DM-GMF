@@ -21,6 +21,10 @@ class NewsletterController extends Controller
         ]);
     }
     function update(Request $request){
+        $this->validate($request, [
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:1024'
+        ]);
+
         $newsletter = DB::table('newsletter')->where('newsletter_id',$request->id)->get();
         $path = $request->image != NULL ? Storage::putFile('newsletter', $request->image) : $newsletter[0]->image;
         if ($request->image != NULL){
@@ -32,8 +36,10 @@ class NewsletterController extends Controller
             'permalink' => $request->permalink != NULL ? $request->permalink : $newsletter[0]->permalink,
             'updated_at' => now()
         ]);
+
         return response()->json([
-            'message' => 'Newsletter Updated'
+            'message' => 'Newsletter Updated',
+            'errors' => ''
         ]);
     }
     function delete($id){
@@ -41,10 +47,15 @@ class NewsletterController extends Controller
         return 'deleted';
     }
     function create(Request $request){
+        $this->validate($request, [
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:1024'
+        ]);
+
         $from = \config('mail.from.address');
         $url = \config('filesystems.disks.local.root');
         $name = \config('mail.from.name');
         $path = $request->image != NULL ? Storage::putFile('newsletter', $request->image) : "";
+
         DB::table('newsletter')->insert([
             'subject' => $request->subject,
             'image' => $path,
@@ -68,7 +79,8 @@ class NewsletterController extends Controller
             });
         }
         return response()->json([
-            'message' => 'Successfully send an email'
+            'message' => 'Successfully send an email',
+            'errors' => ''
         ]);
     }
 }
