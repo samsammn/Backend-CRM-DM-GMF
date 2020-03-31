@@ -42,6 +42,8 @@ use Illuminate\Support\Facades\Route;
 //     return "Redis Cleared";
 // });
 
+Route::post('/merge', 'BirthdayCardController@merge');
+
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });

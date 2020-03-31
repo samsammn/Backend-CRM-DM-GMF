@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Image;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
@@ -75,5 +76,46 @@ class BirthdayCardController extends Controller
             'message' => 'Birthday Card Created',
             'errors' => ''
         ]);
+    }
+
+    public function merge(Request $request)
+    {
+        // $filename = 'http://172.16.41.180:8080/storage/birthdaycard/lCmIlRAEmcNWdpKdVVjIu6ksB15MvSI7tA4SLD0Y.png';
+        // $filename = 'http://172.16.41.180:8080/storage/birthdaycard/LlK7MK2i8UO2nvHUZ4I5NHD3PlUKtN1FELHeJtfh.jpeg';
+        $filename = $request->file('image')->getRealPath();
+
+        $img = Image::make($filename);
+        $width = $img->width();
+        $height = $img->height();
+
+        $pos_x = round($width / 2);
+        $pos_y = round($height / 2) - 110;
+
+        $img->text('Happy Birthday', $pos_x, $pos_y, function($font) {
+            $font->file(resource_path('fonts/futur.ttf'));
+            $font->size(22);
+            $font->color('#fff');
+            $font->align('center');
+            $font->valign('top');
+            $font->angle(0);
+        });
+        $img->text('Samsam MN', $pos_x, ($pos_y + 45), function($font) {
+            $font->file(resource_path('fonts/futur.ttf'));
+            $font->size(18);
+            $font->color('#fff');
+            $font->align('center');
+            $font->valign('top');
+            $font->angle(0);
+        });
+        $img->text('Wishing you a wonderful birthday and a year filled with success', $pos_x, ($pos_y + 100), function($font) {
+            $font->file(resource_path('fonts/futur.ttf'));
+            $font->size(12);
+            $font->color('#fff');
+            $font->align('center');
+            $font->valign('top');
+            $font->angle(0);
+        });
+
+        return $img->response('jpg');
     }
 }
