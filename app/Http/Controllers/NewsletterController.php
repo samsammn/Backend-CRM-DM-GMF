@@ -68,14 +68,17 @@ class NewsletterController extends Controller
             DB::table('user_customer')->where('user_customer_id',$cust->user_customer_id)->update([
                 "new_info" => $cust->new_info + 1
             ]);
-            $data = array('subject' => $request->subject, 'name'=>$name, 'path' => $path, 'attachment'=>$url."/".$path , 'from' => $from, 'to'=>$cust->email, 'type'=>"Newsletter");
-            Mail::send('mail', $data, function($message) use ($data) {
+
+            $image = "http://172.16.41.180:8080/storage/".$path;
+
+            $data = array('subject' => $request->subject, 'name' => $name, 'path' => $path, 'attachment'=>$url."/".$path , 'from' => $from, 'to'=>$cust->email, 'type'=>"Newsletter", 'image' => $image);
+            Mail::send('mailnewslater', $data, function($message) use ($data) {
                 $message->to($data['to'], "Customer")->subject
                 ($data['subject']);
                 if ($data['path'] != ""){
                     $message->attach($data['attachment']);
                 }
-                $message->from($data['from'],"Juan");
+                $message->from($data['from'], "Garuda Maintenance Facility");
             });
         }
         return response()->json([

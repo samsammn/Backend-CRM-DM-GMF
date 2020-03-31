@@ -50,8 +50,7 @@ class SendHolidayCard extends Command
                     $customer = DB::table('user_customer')->get();
                     foreach ($customer as $cust){
                         if ($cust->religion == $rc->religion || $rc->religion == "Universal"){
-                            $image = "http://172.16.40.180:8080/storage/".$path;
-                            
+                            $image = "http://172.16.41.180:8080/storage/".$path;
                             $name = $cust->name;
                             $data = array('subject' => $rc->subject, 'name'=>$name, 'path' => $path, 'attachment'=>$url."/".$path , 'from' => $from, 'to'=>$cust->email,'type'=>"Holiday Card", 'image' => $image);
                             Mail::send('mailholiday', $data, function($message) use ($data) {
@@ -60,7 +59,7 @@ class SendHolidayCard extends Command
                                 if ($data['path'] != ""){
                                     $message->attach($data['attachment']);
                                 }
-                                $message->from($data['from'],"Juan");
+                                $message->from($data['from'], "Garuda Maintenance Facility");
                             });
                         }
                     }

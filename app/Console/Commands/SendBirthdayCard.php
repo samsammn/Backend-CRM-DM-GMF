@@ -43,26 +43,24 @@ class SendBirthdayCard extends Command
             $birthday_card = DB::table('birthday_card')->get();
             $from = \config('mail.from.address');
             $url = \config('filesystems.disks.local.root');
-            
+
                 $path = $birthday_card[0]->image;
                 $customer = DB::table('user_customer')->get();
                 foreach ($customer as $cust){
                     if (date('d-m',strtotime(now()->toDateString())) == date('d-m',strtotime($cust->birthday))){
-                        $image = "http://172.16.40.180:8080/storage/".$path;
+                        $image = "http://172.16.41.180:8080/storage/".$path;
                         $name = $cust->name;
-                        $data = array('subject' => $rc->subject, 'name'=>$name, 'path' => $path, 'attachment'=>$url."/".$path , 'from' => $from, 'to'=>$cust->email,'type'=>"Holiday Card", 'image' => $image);
+                        $data = array('subject' => $birthday_card[0]->subject, 'name' => $name, 'path' => $path, 'attachment' => $image , 'from' => $from, 'to' => $cust->email,'type' => "Birthday Card", 'image' => $image);
                         Mail::send('mail', $data, function($message) use ($data) {
                             $message->to($data['to'], "Customer")->subject
                             ($data['subject']);
                             if ($data['path'] != ""){
                                 $message->attach($data['attachment']);
                             }
-                            $message->from($data['from'],"Juan");
+                            $message->from($data['from'], "Garuda Maintenance Facility");
                         });
                     }
                 }
-                
-            
         }
     }
 }

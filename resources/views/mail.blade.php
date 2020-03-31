@@ -1,13 +1,10 @@
 
-<p>Information Example for {{$type}}</p>
-<table background="https://cdn2.tstatic.net/aceh/foto/bank/images/google_20180507_120938.jpg" width="100%" height="100%">
-  <tr>
-      <td>
-          <div class="preview-text">
-              <h2>Happy Birthday</h2>
-              <h4>{{$name}}</h4>
-              <p>Wishing you a wonderful birthday and a year filled with success</p>
-          </div>
-      </td>
-  </tr>
-</table>
+<p>{{$type}}</p>
+<div style="position:relative" align="center">
+    <img src="<?php echo $message->embed($image); ?>">
+    <div style="position: absolute;  margin-left: auto;  margin-right: auto;  top: 200px;  left: 0;  right: 0;  text-align: center;">
+        <h2>Happy Birthday</h2>
+        <h4>{{$name}}</h4>
+        <p>Wishing you a wonderful birthday and a year filled with success</p>
+    </div>
+</div>
