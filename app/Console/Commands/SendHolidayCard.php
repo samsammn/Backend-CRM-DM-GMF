@@ -52,7 +52,7 @@ class SendHolidayCard extends Command
                         if ($cust->religion == $rc->religion || $rc->religion == "Universal"){
                             $image = "http://172.16.41.180:8080/storage/".$path;
                             $name = $cust->name;
-                            $data = array('subject' => $rc->subject, 'name'=>$name, 'path' => $path, 'attachment'=>$url."/".$path , 'from' => $from, 'to'=>$cust->email,'type'=>"Holiday Card", 'image' => $image);
+                            $data = array('subject' => $rc->subject, 'name'=>$name, 'path' => $path, 'attachment' => $url."/".$path , 'from' => $from, 'to' => $cust->email,'type' => "Holiday Card", 'image' => $image);
                             Mail::send('mailholiday', $data, function($message) use ($data) {
                                 $message->to($data['to'], "Customer")->subject
                                 ($data['subject']);
