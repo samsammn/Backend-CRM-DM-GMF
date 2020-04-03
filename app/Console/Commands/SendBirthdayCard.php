@@ -2,9 +2,11 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use Mail;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Image;
+use Intervention\Image\Response;
 
 class SendBirthdayCard extends Command
 {
@@ -48,8 +50,11 @@ class SendBirthdayCard extends Command
                 $customer = DB::table('user_customer')->get();
                 foreach ($customer as $cust){
                     if (date('d-m',strtotime(now()->toDateString())) == date('d-m',strtotime($cust->birthday))){
-                        $image = "http://172.16.41.180:8080/storage/".$path;
+                        $image_path = "http://172.16.41.180:8080/storage/".$path;
                         $name = $cust->name;
+
+                        $image = $this->merge_image($image_path, $name);
+
                         $data = array('subject' => $birthday_card[0]->subject, 'name' => $name, 'path' => $path, 'attachment' => $image , 'from' => $from, 'to' => $cust->email,'type' => "Birthday Card", 'image' => $image);
                         Mail::send('mail', $data, function($message) use ($data) {
                             $message->to($data['to'], "Customer")->subject
@@ -62,5 +67,47 @@ class SendBirthdayCard extends Command
                     }
                 }
         }
+    }
+
+    public function merge_image($image, $name)
+    {
+        $filename = $image;
+
+        $img = Image::make($filename);
+        $width = $img->width();
+        $height = $img->height();
+
+        $pos_x = round($width / 2);
+        $pos_y = round($height / 2) - 110;
+
+        $img->text('Happy Birthday', $pos_x, $pos_y, function($font) {
+            $font->file(resource_path('fonts/futur.ttf'));
+            $font->size(22);
+            $font->color('#fff');
+            $font->align('center');
+            $font->valign('top');
+            $font->angle(0);
+        });
+        $img->text($name, $pos_x, ($pos_y + 45), function($font) {
+            $font->file(resource_path('fonts/futur.ttf'));
+            $font->size(18);
+            $font->color('#fff');
+            $font->align('center');
+            $font->valign('top');
+            $font->angle(0);
+        });
+        $img->text('Wishing you a wonderful birthday and a year filled with success', $pos_x, ($pos_y + 100), function($font) {
+            $font->file(resource_path('fonts/futur.ttf'));
+            $font->size(12);
+            $font->color('#fff');
+            $font->align('center');
+            $font->valign('top');
+            $font->angle(0);
+        });
+
+        $path = 'public/storage/birthdaycard/' . uniqid('for_email_') . '.png';
+        $img->save($path);
+
+        return $path;
     }
 }
